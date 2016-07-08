@@ -1,0 +1,20 @@
+Relevant Links:
+
+rnn story teller (from images):
+https://github.com/ryankiros/neural-storyteller
+
+Tensor Flow:
+https://www.tensorflow.org/
+
+Background on Neural Networks:
+http://www.wildml.com/2015/09/implementing-a-neural-network-from-scratch/
+https://www.tensorflow.org/versions/r0.9/tutorials/index.html
+
+Background on RNNs:
+http://karpathy.github.io/2015/05/21/rnn-effectiveness/
+http://colah.github.io/posts/2015-08-Understanding-LSTMs/
+http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
+http://cs224d.stanford.edu/syllabus.html
+
+Background on CNN's
+http://cs231n.github.io
