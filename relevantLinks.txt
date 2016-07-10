@@ -18,3 +18,7 @@ http://cs224d.stanford.edu/syllabus.html
 
 Background on CNN's
 http://cs231n.github.io
+
+AWS:
+https://cs224d.stanford.edu/supplementary/aws-tutorial-2.pdf
+http://cs231n.github.io/aws-tutorial/
