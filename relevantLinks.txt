@@ -22,9 +22,11 @@ Background on CNN's
 http://cs231n.github.io
 
 Trained CNNs:
+https://www.tensorflow.org/versions/r0.9/tutorials/image_recognition/index.html
 https://github.com/MarvinTeichmann/tensorflow-fcn
 Caffe to Tensorflow: https://github.com/ethereon/caffe-tensorflow
 
 AWS:
+http://blog.impiyush.me/2015/02/running-ipython-notebook-server-on-aws.html
 https://cs224d.stanford.edu/supplementary/aws-tutorial-2.pdf
 http://cs231n.github.io/aws-tutorial/
