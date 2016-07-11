@@ -2,6 +2,8 @@ Relevant Links:
 
 rnn story teller (from images):
 https://github.com/ryankiros/neural-storyteller
+Poetry from images:
+https://github.com/rossgoodwin/neuralsnap
 
 Tensor Flow:
 https://www.tensorflow.org/
@@ -18,6 +20,10 @@ http://cs224d.stanford.edu/syllabus.html
 
 Background on CNN's
 http://cs231n.github.io
+
+Trained CNNs:
+https://github.com/MarvinTeichmann/tensorflow-fcn
+Caffe to Tensorflow: https://github.com/ethereon/caffe-tensorflow
 
 AWS:
 https://cs224d.stanford.edu/supplementary/aws-tutorial-2.pdf
