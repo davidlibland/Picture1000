@@ -3,6 +3,7 @@ from werkzeug.utils import secure_filename
 import os
 from app import app, db
 from .models import Poem
+from app import classify_image
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -24,7 +25,9 @@ def process_image():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            poem=Poem(filename=filename,poem='roses are red, violets')
+            classify_image.maybe_download_and_extract()
+            image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            poem=Poem(filename=filename,poem=classify_image.run_inference_on_image(image))
             db.session.add(poem)
             db.session.commit()
             return redirect(url_for('index'))
@@ -39,3 +42,4 @@ def index():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+                               
