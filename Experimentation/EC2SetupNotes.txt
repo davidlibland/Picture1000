@@ -1,0 +1,30 @@
+To install jupyter and tensorflow on ec2:
+1) start ubuntu ec2 with ssh, https, tcp 8888, tcp 6006
+2) sudo apt-get update
+3) install miniconda:
+wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+chmod 777 Miniconda3-latest-Linux-x86_64.sh
+./Miniconda3-latest-Linux-x86_64.sh
+4) install jupyter
+conda install jupyter
+5) set up jupyter server using tutorial: http://blog.impiyush.me/2015/02/running-ipython-notebook-server-on-aws.html
+6) install numpy
+conda install numpy
+7) install tensorflow:
+wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
+sudo -H ~/miniconda3/bin/pip3.5 install --upgrade tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
+
+8) Install Flask
+conda install flask
+conda install sql-alchemy
+~/miniconda3/bin/pip install flask-sqlalchemy
+
+9) Set up the server:
+sudo apt-get install build-essential
+sudo -H ~/miniconda3/bin/pip install mod-wsgi-httpd
+sudo -H ~/miniconda3/bin/pip3.5 install mod-wsgi
+
+10) Set up the site:
+git clone https://github.com/davidlibland/Picture1000/
+cd Picture1000/UI/
+mod_wsgi-express start-server picture1000.wsgi

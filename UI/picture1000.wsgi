@@ -1,0 +1,1 @@
+from picture1000 import app as application
