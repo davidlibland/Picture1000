@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+    <h1>Hi, welcome to picture 1000</h1>
+    {% for img_poem in img_poems %}
+    <div><p><IMG SRC="{{ url_for('uploaded_file',
+                                    filename=img_poem.filename) }}" ALT="missing image" WIDTH=128 HEIGHT=128>
+    <p><b>{{ img_poem.poem }}</b></p></div>
+    {% endfor %}
+{% endblock %}
