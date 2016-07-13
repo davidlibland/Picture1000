@@ -12,19 +12,19 @@ conda install jupyter
 conda install numpy
 7) install tensorflow:
 wget https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
-sudo -H ~/miniconda3/bin/pip3.5 install --upgrade tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
+sudo -H ~/miniconda3/bin/pip3 install --upgrade tensorflow-0.9.0-cp35-cp35m-linux_x86_64.whl
 
 8) Install Flask
 conda install flask
-conda install sql-alchemy
-~/miniconda3/bin/pip install flask-sqlalchemy
+conda install sqlalchemy
+~/miniconda3/bin/pip3 install flask-sqlalchemy
 
 9) Set up the server:
 sudo apt-get install build-essential
-sudo -H ~/miniconda3/bin/pip install mod-wsgi-httpd
-sudo -H ~/miniconda3/bin/pip3.5 install mod-wsgi
+sudo -H ~/miniconda3/bin/pip3 install mod-wsgi-httpd
+sudo -H ~/miniconda3/bin/pip3 install mod-wsgi
 
 10) Set up the site:
 git clone https://github.com/davidlibland/Picture1000/
 cd Picture1000/UI/
-mod_wsgi-express start-server picture1000.wsgi
+mod_wsgi-express start-server —reload-on-changes picture1000.wsgi
