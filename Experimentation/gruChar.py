@@ -151,8 +151,21 @@ def sample_rnn(seed=None,restore=False):
     if restore:
         load_rnn()
     state = initial_state.eval()
-    ix=np.random.choice(range(vocab_size))
-    txt=''
+    # If we're given a seed, then we want to initialize the model with that seed:
+    if seed != None:
+        # First we translate the seed (in characters) to numbers using our dictionary
+        seed_IDs = [char_to_ix[ch] for ch in seed]
+        # Then we feed that list of numbers recursively into the rnn
+        for seed_ix in seed_IDs[:-2]:
+            out_prob,state = sess.run([sample_output_prob,sample_output_state],
+                                     {sample_input_ID: [seed_ix],
+                                      sample_input_state: state})
+        # Finally, we record the last number in our seed as ix - which we use as the next input of the rnn
+        ix=seed_IDs[-1]
+        txt=seed
+    else:
+        ix=np.random.choice(range(vocab_size))
+        txt=''
     # we generate the sample by applying the GRU recursively to it's ouput
     for i in range(sample_length):
         out_prob,state = sess.run([sample_output_prob,sample_output_state],
@@ -197,7 +210,18 @@ def load_rnn():
     
 def main():
     #train_rnn()
-    print(sample_rnn(restore=True))
-
+    print(sample_rnn(seed='love',restore=True))
+    print("-"*30)
+    print(sample_rnn(seed='The'))
+    print("-"*30)
+    print(sample_rnn(seed='my'))
+    print("-"*30)
+    print(sample_rnn(seed='in'))
+    print("-"*30)
+    print(sample_rnn(seed='wild beaches'))
+    print("-"*30)
+    print(sample_rnn(seed='the bottle'))
+    print("-"*30)
+    print(sample_rnn(seed='at opposite'))
 if __name__ == "__main__":
     main()
