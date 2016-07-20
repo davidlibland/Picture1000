@@ -30,3 +30,6 @@ AWS:
 http://blog.impiyush.me/2015/02/running-ipython-notebook-server-on-aws.html
 https://cs224d.stanford.edu/supplementary/aws-tutorial-2.pdf
 http://cs231n.github.io/aws-tutorial/
+
+FLASK tutorial:
+http://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database
