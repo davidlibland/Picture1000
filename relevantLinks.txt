@@ -17,6 +17,7 @@ http://karpathy.github.io/2015/05/21/rnn-effectiveness/
 http://colah.github.io/posts/2015-08-Understanding-LSTMs/
 http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-1-introduction-to-rnns/
 http://cs224d.stanford.edu/syllabus.html
+http://arxiv.org/pdf/1511.06349.pdf
 
 Background on CNN's
 http://cs231n.github.io
@@ -33,3 +34,4 @@ http://cs231n.github.io/aws-tutorial/
 
 FLASK tutorial:
 http://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-iv-database
+
