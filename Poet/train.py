@@ -18,7 +18,7 @@ def main():
     print("Data Input")
     print("-"*30)
     #raw_data_IDs, char_to_ix, ix_to_char, vocab_size  = readFile.raw_data('haiku.txt')
-    poems_encoded,weights,id_to_word=readPoetry.read_data('./database.pkl')
+    poems_encoded,weights,word_to_id,id_to_word=readPoetry.read_data('./database.pkl')
     poems_encoded=np.random.permutation(poems_encoded)[:5]
     vocab_size=len(id_to_word)
     args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,num_steps=4,batch_size=2,keep_prob=1)
@@ -49,7 +49,6 @@ def train_rnn(args,text_file=None,restore=False):
         
         # Initialize the variables
         tf.initialize_all_variables().run()
-        num_unrolls=len(poems_encoded[0])//args.num_steps
         for i in range(max_epochs):
             epoch_size = ((len(poems_encoded)*len(poems_encoded[0]) // args.batch_size) - 1) // args.num_steps
             print("epoch_size: ",epoch_size)
@@ -59,10 +58,9 @@ def train_rnn(args,text_file=None,restore=False):
             #state = sess.run(p.initial_state,{p.theme_ID: [0]})
             # we backpropogate over a fixed number (num_steps) of GRU units, but we save the final_state
             # so that we can train the rnn to remember things over a much longer string.
-            for step, (x, y,themes,strengths) in enumerate(readPoetry.id_iterator(poems_encoded,weights, args.batch_size,args.num_steps)):
-                if step % num_unrolls==0:
+            for step, (x, y,themes,strengths,new_batch) in enumerate(readPoetry.id_iterator(poems_encoded,weights, args.batch_size,args.num_steps)):
+                if new_batch:
                     state = sess.run(p.initial_state,{p.theme_ID: themes})
-                    print('step',step)
                 summary, cost_on_iter, state, _ = sess.run([p.merged, p.cost, p.final_state, p.train_op],
                                          {p.input_IDs: x,
                                           p.target_IDs: y,
@@ -106,15 +104,27 @@ def train_rnn(args,text_file=None,restore=False):
                 # but for a large number of words, the probabilities may not sum close enough to 1,
                 # so we do the following instead:
                 #now choose a random number
-                rn = np.random.rand(1)[0]
-                cnt=0.0
-                p_out_prob=out_prob.ravel()
-                for i in range(len(p_out_prob)):
-                    cnt+=p_out_prob[i]
-                    if rn <= cnt:
-                        sample=i
-                        break
-                ix=range(args.word_vocab_size)[sample]
+                if id_to_word[ix]!='<eos>':
+                    rn = np.random.rand(1)[0]
+                    cnt=0.0
+                    p_out_prob=out_prob.ravel()
+                    for i in range(len(p_out_prob)):
+                        cnt+=p_out_prob[i]
+                        if rn <= cnt:
+                            sample=i
+                            break
+                    ix=range(args.word_vocab_size)[sample]
+                else:
+                    while id_to_word[ix]=='<eos>':
+                        rn = np.random.rand(1)[0]
+                        cnt=0.0
+                        p_out_prob=out_prob.ravel()
+                        for i in range(len(p_out_prob)):
+                            cnt+=p_out_prob[i]
+                            if rn <= cnt:
+                                sample=i
+                                break
+                        ix=range(args.word_vocab_size)[sample]
                 txt+=id_to_word[ix]+" "
             #txt = sample_rnn()
             print('----\n %s \n----' % (txt.replace('<eos>',"\n"), ))

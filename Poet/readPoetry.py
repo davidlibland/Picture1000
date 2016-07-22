@@ -54,7 +54,7 @@ def read_data(data_path):
         weights={}
         for w in common_words:
             weights[word_to_id[w]]=1/words[w]
-        return poems_encoded,weights,id_to_word
+        return poems_encoded,weights,word_to_id,id_to_word
 
 def id_iterator(raw_data, weights, batch_size, num_steps):
     """Iterate on the raw data, a list of poems (with words converted to ids)
@@ -92,4 +92,4 @@ def id_iterator(raw_data, weights, batch_size, num_steps):
         for i in range(poem_length//num_steps):
             x=current_batch[:,i*num_steps:(i+1)*num_steps]
             y = current_batch[:, i*num_steps+1:(i+1)*num_steps+1]
-            yield (x,y,themes,strengths)
+            yield (x,y,themes,strengths,i==0)
