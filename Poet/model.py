@@ -3,6 +3,8 @@
 
 import tensorflow as tf
 import datetime
+import os
+from . import config
 #from tensorflow.models.rnn_* import rnn
 #import numpy as np
 
@@ -10,7 +12,7 @@ class PoetArgs(object):
     def __init__(self,batch_size = 4, num_steps = 128, learning_rate = 0.01, max_grad_norm = 5.,
                     init_scale = 0.05, hidden_size = 128, keep_prob = .5, word_embedding_size = 32,
                     word_vocab_size = 128, theme_embedding_size = 32, theme_vocab_size = 128,
-                    log_dir="./tmp/PoetLog"+datetime.datetime.now().isoformat()):
+                    log_dir=os.path.join(config.base_dir,"tmp/PoetLog"+datetime.datetime.now().isoformat())):
         self.batch_size = batch_size
         self.num_steps = num_steps
         self.learning_rate = learning_rate

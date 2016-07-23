@@ -3,12 +3,13 @@
 import time
 import tensorflow as tf
 import numpy as np
-import model
-import readPoetry
+from . import model
+from . import readPoetry
 import copy
-
-max_epochs=10
-sample_length=64
+import os
+from . import sample
+from . import config
+import dill
 
 
 
@@ -18,11 +19,19 @@ def main():
     print("Data Input")
     print("-"*30)
     #raw_data_IDs, char_to_ix, ix_to_char, vocab_size  = readFile.raw_data('haiku.txt')
-    poems_encoded,weights,word_to_id,id_to_word=readPoetry.read_data('./database.pkl')
-    poems_encoded=np.random.permutation(poems_encoded)[:5]
+    poems_encoded,weights,word_to_id,id_to_word=readPoetry.read_data(os.path.join(config.base_dir,'database.pkl'))
+    poems_encoded=np.random.permutation(poems_encoded)[:1024]
     vocab_size=len(id_to_word)
-    args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,num_steps=4,batch_size=2,keep_prob=1)
+    args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,num_steps=32,batch_size=16,keep_prob=0.5,hidden_size=512)
+    # Now save the dictionary, so that we can reload it.
+    # we ought to save the training data too, but we don't (to save space)
+    if not os.path.exists(args.log_dir):
+        os.makedirs(args.log_dir)
+    with open(os.path.join(args.log_dir,"dict.pkl"),'wb') as f:
+        dill.dump({'weights':weights,'word_to_id':word_to_id,'id_to_word':id_to_word,'args':args},f)
     train_rnn(args)
+    tf.reset_default_graph() 
+    sample.sample(args.log_dir)
 
 def train_rnn(args,text_file=None,restore=False):
     #if restore:
@@ -49,7 +58,9 @@ def train_rnn(args,text_file=None,restore=False):
         
         # Initialize the variables
         tf.initialize_all_variables().run()
-        for i in range(max_epochs):
+        
+        saver = tf.train.Saver()
+        for i in range(config.MAX_EPOCHS):
             epoch_size = ((len(poems_encoded)*len(poems_encoded[0]) // args.batch_size) - 1) // args.num_steps
             print("epoch_size: ",epoch_size)
             start_time = time.time()
@@ -89,7 +100,7 @@ def train_rnn(args,text_file=None,restore=False):
             ix=np.random.choice(range(args.word_vocab_size))
             txt=''
             # we generate the sample by applying the GRU recursively to it's ouput
-            for i in range(sample_length):
+            for i in range(config.SAMPLE_LENGTH):
                 out_prob,state = sess.run([p_sample.output_prob,p_sample.final_state],
                                          {p_sample.input_IDs: [[ix]],
                                           p_sample.initial_state: state})
@@ -104,7 +115,7 @@ def train_rnn(args,text_file=None,restore=False):
                 # but for a large number of words, the probabilities may not sum close enough to 1,
                 # so we do the following instead:
                 #now choose a random number
-                if id_to_word[ix]!='<eos>':
+                if True or id_to_word[ix]!='<eos>':
                     rn = np.random.rand(1)[0]
                     cnt=0.0
                     p_out_prob=out_prob.ravel()
@@ -115,7 +126,7 @@ def train_rnn(args,text_file=None,restore=False):
                             break
                     ix=range(args.word_vocab_size)[sample]
                 else:
-                    while id_to_word[ix]=='<eos>':
+                    for i in range(10):
                         rn = np.random.rand(1)[0]
                         cnt=0.0
                         p_out_prob=out_prob.ravel()
@@ -125,11 +136,17 @@ def train_rnn(args,text_file=None,restore=False):
                                 sample=i
                                 break
                         ix=range(args.word_vocab_size)[sample]
+                        if id_to_word[ix]!='<eos>':
+                            break
                 txt+=id_to_word[ix]+" "
             #txt = sample_rnn()
             print('----\n %s \n----' % (txt.replace('<eos>',"\n"), ))
+            with open(os.path.join(args.log_dir,"output.txt"),'a') as f_out:
+                f_out.write("Theme: "+id_to_word[sample_theme_ID]+"\n")
+                f_out.write('----\n %s \n----' % (txt.replace('<eos>',"\n"), ))
         # Save the model in case we want to load it later...
-    #save_rnn()
+        save_path = saver.save(sess, os.path.join(args.log_dir,"model.ckpt"))
+        print("Model saved in file: %s" % save_path)
 
 
 if __name__ == '__main__':
