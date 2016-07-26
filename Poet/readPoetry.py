@@ -21,32 +21,11 @@
 
 from collections import Counter
 import numpy as np
-try:
-    from six.moves import cPickle as pickle
-except:
-    import pickle
-
-
-def raw_data(data_path):
-    # data I/O
-    raw_data_chars = open(data_path, 'r').read() # should be simple plain text file
-    chars = list(set(raw_data_chars))
-    data_size, vocab_size = len(raw_data_chars), len(chars)
-    print('data has %d characters, %d unique.' % (data_size, vocab_size))
-    
-    # We create char-to-id and id-to-char lookup dictionaries.
-    char_to_ix = { ch:i for i,ch in enumerate(chars) }
-    ix_to_char = { i:ch for i,ch in enumerate(chars) }
-    
-    # We convert the characters to unique id's.
-    raw_data_IDs = [char_to_ix[ch] for ch in raw_data_chars]
-    
-    # We return the text as a string of ids, the character lookup table, and the vocabulary size
-    return raw_data_IDs, char_to_ix, ix_to_char, vocab_size 
+import dill
     
 def read_data(data_path):
     with open(data_path,'rb') as f:
-        poems_encoded,words,word_to_id,id_to_word = pickle.load(f)
+        poems_encoded,words,word_to_id,id_to_word = dill.load(f)
         common_words={}
         for w in words:
             if words[w] > 1:
