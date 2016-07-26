@@ -44,8 +44,8 @@ class PoetModel(object):
         # For instance, the word `the' is extremely common, so it not a strong theme of any given poem,
         # While the word 'disgust' is far less common, and hence a stronger `theme' if found in any poem.
         # Note: this placeholder is only used during training.
-        self._theme_strength=tf.placeholder(tf.float32,[self.args.batch_size],name="theme_strength")
-        theme_strength_reshaped=tf.reshape(self.theme_strength,[-1,1]) 
+        #self._theme_strength=tf.placeholder(tf.float32,[self.args.batch_size],name="theme_strength")
+        #theme_strength_reshaped=tf.reshape(self.theme_strength,[-1,1]) 
                 
         if is_training:
             name_scope = "rnnPoetTrainer"
@@ -73,6 +73,7 @@ class PoetModel(object):
             if is_training and self.args.keep_prob < 1:
                 cell = tf.nn.rnn_cell.DropoutWrapper(
                             cell, output_keep_prob=self.args.keep_prob)
+            
             # The initial state should be the concatination of the theme and the zero state.
             # dim 0 is batch size, so we concatinate along dim 1.
             self._initial_state = tf.concat(1,[tf.zeros([self.args.batch_size, self.args.hidden_size], tf.float32),theme],name="initial_state") 
@@ -106,12 +107,12 @@ class PoetModel(object):
             
             # Compute the loss
             with tf.name_scope('total_loss'):
-                weight_list = [theme_strength_reshaped for _ in range(self.args.num_steps)]
-                weights=tf.reshape(tf.concat(1, weight_list), [-1])
+                #weight_list = [theme_strength_reshaped for _ in range(self.args.num_steps)]
+                #weights=tf.reshape(tf.concat(1, weight_list), [-1])
                 loss = tf.nn.seq2seq.sequence_loss_by_example(
                     [logits],
                     [tf.reshape(self.target_IDs, [-1])],
-                    [weights])
+                    [tf.ones([self.args.batch_size * self.args.num_steps])])
                 self._cost = tf.reduce_sum(loss) / self.args.batch_size
             if verbose:
                 tf.histogram_summary("output weights", softmax_w)
@@ -151,9 +152,9 @@ class PoetModel(object):
     def theme_ID(self):
         return self._theme_ID
     
-    @property
-    def theme_strength(self):
-        return self._theme_strength
+#     @property
+#     def theme_strength(self):
+#         return self._theme_strength
     
     @property
     def initial_state(self):
