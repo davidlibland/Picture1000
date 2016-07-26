@@ -4,6 +4,8 @@ import os
 from app import app, db
 from .models import Poem
 from app import classify_image
+#from app import gruChar
+import tensorflow as tf
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -23,11 +25,19 @@ def process_image():
             flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
+            # Check that the file name passed is safe...
             filename = secure_filename(file.filename)
+            # save the file
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            # Run the poetry generation algorithm.
             classify_image.maybe_download_and_extract()
             image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            poem=Poem(filename=filename,poem=classify_image.run_inference_on_image(image))
+            theme_txt=classify_image.run_inference_on_image(image)
+            poem_txt=theme_txt #gruChar.sample_rnn(seed=theme_txt,restore=True)
+            
+            
+            poem=Poem(filename=filename,poem=poem_txt)
             db.session.add(poem)
             db.session.commit()
             return redirect(url_for('index'))
