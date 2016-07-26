@@ -24,6 +24,7 @@ def main():
     vocab_size=len(id_to_word)
     theme_vocab_size=len(themes)
     args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,
+            learning_rate=config.LEARNING_RATE,init_scale=config.INIT_SCALE,
             num_steps=config.NUM_STEPS,batch_size=config.BATCH_SIZE,keep_prob=config.KEEP_PROB,hidden_size=config.HIDDEN_SIZE)
     # Now save the dictionary, so that we can reload it.
     # we ought to save the training data too, but we don't (to save space)
