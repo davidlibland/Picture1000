@@ -4,8 +4,7 @@ import os
 from app import app, db
 from .models import Poem
 from app import classify_image
-#from app import gruChar
-import tensorflow as tf
+from app import EmoAPI
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -29,19 +28,20 @@ def process_image():
             filename = secure_filename(file.filename)
             # save the file
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            
             # Run the poetry generation algorithm.
             classify_image.maybe_download_and_extract()
-            image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            theme_txt=classify_image.run_inference_on_image(image)
-            poem_txt=theme_txt #gruChar.sample_rnn(seed=theme_txt,restore=True)
+            path_to_image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            with open(path_to_image) as f:
+                image_data=f.read()
+            sent_anal_result = EmoAPI.sentiment_analysis(image_data)
+            #theme_txt=classify_image.run_inference_on_image(path_to_image)
+            #poem_txt=theme_txt #gruChar.sample_rnn(seed=theme_txt,restore=True)
             
-            
-            poem=Poem(filename=filename,poem=poem_txt)
+            poem=Poem(filename=filename,poem=sent_anal_result)
             db.session.add(poem)
             db.session.commit()
             return redirect(url_for('index'))
-    return render_template('upload.html')
+    return render_template('upload.html')   
     
 @app.route('/')
 @app.route('/index')
