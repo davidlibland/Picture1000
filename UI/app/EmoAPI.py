@@ -132,5 +132,5 @@ def sentiment_analysis(image_data):
 #    ax.imshow( img )
     
    
-print (result)
+#print (result)
 
