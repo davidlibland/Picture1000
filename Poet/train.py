@@ -20,10 +20,11 @@ def main():
     print("-"*30)
     #raw_data_IDs, char_to_ix, ix_to_char, vocab_size  = readFile.raw_data('haiku.txt')
     prepared_poems,word_to_id,id_to_word,themes=readPoetry.read_data(os.path.join(config.base_dir,'prepared_poem_data.pkl'))
-    prepared_poems=np.random.permutation(prepared_poems)[:25]
+    prepared_poems=np.random.permutation(prepared_poems)[:config.NUM_POEMS]
     vocab_size=len(id_to_word)
     theme_vocab_size=len(themes)
-    args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,num_steps=4,batch_size=2,keep_prob=0.5,hidden_size=64)
+    args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,
+            num_steps=config.NUM_STEPS,batch_size=config.BATCH_SIZE,keep_prob=config.KEEP_PROB,hidden_size=config.HIDDEN_SIZE)
     # Now save the dictionary, so that we can reload it.
     # we ought to save the training data too, but we don't (to save space)
     if not os.path.exists(args.log_dir):

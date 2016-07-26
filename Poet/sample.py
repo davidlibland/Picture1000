@@ -7,7 +7,7 @@ from . import config
 import os
 import dill
 
-def sample(save_dir=os.path.join(config.base_dir,'Saved_Model_Dir'),sample_length=32):
+def sample(save_dir=os.path.join(config.base_dir,'Saved_Model_Dir'),sample_length=32,num_samples=5):
     # Load the saved dictionary
     print("-"*30)
     print("loading the dictionary")
@@ -29,39 +29,41 @@ def sample(save_dir=os.path.join(config.base_dir,'Saved_Model_Dir'),sample_lengt
     initializer = tf.random_uniform_initializer(-args.init_scale,args.init_scale)
     with tf.variable_scope("model", reuse = None, initializer = initializer):
         p_sample = model.PoetModel(args=args, is_training = False)
+        
+    
     
                                             
     with tf.Session() as sess:
-        sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args,sample_length)
+        # Initialize the variables
+        tf.initialize_all_variables().run()
+    
+        saver = tf.train.Saver()
+    
+    
+        print("-"*30)
+        print("loading the model")
+        print("-"*30)
+        ckpt = tf.train.get_checkpoint_state(args.log_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            # Restores from checkpoint
+            saver.restore(sess, ckpt.model_checkpoint_path)
+            print("Model restored.")
+        else:
+            print("No checkpoint file found")
+        for i in range(num_samples):
+            sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args,sample_length)
         
 
 def sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args,sample_length=32):
     print("-"*30)
-    print("training")
+    print("Sampling")
     print("-"*30)
-    
-    # Initialize the variables
-    tf.initialize_all_variables().run()
-    
-    saver = tf.train.Saver()
-    
-    
-    print("-"*30)
-    print("loading the model")
-    print("-"*30)
-    ckpt = tf.train.get_checkpoint_state(args.log_dir)
-    if ckpt and ckpt.model_checkpoint_path:
-        # Restores from checkpoint
-        saver.restore(sess, ckpt.model_checkpoint_path)
-        print("Model restored.")
-    else:
-        print("No checkpoint file found")
     
     #Choose a theme:
     sample_theme=np.random.choice(list(themes.keys()))
     sample_theme_ID=word_to_id[sample_theme]
     
-    print("Theme: "+id_to_word[sample_theme_ID]+"\n")
+    print("Theme: "+sample_theme+"\n")
     state = sess.run(p_sample.initial_state,{p_sample.theme_ID: [sample_theme_ID]})
     # generate the sample:
     ix=word_to_id['<sop>']
