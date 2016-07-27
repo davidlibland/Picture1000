@@ -23,9 +23,13 @@ def main():
     prepared_poems=np.random.permutation(prepared_poems)[:config.NUM_POEMS]
     vocab_size=len(id_to_word)
     theme_vocab_size=len(themes)
+    print("number of training poems: %d, vocab size: %d, theme size: %d" %(len(prepared_poems),vocab_size,theme_vocab_size))
     args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,
             learning_rate=config.LEARNING_RATE,init_scale=config.INIT_SCALE,
-            num_steps=config.NUM_STEPS,batch_size=config.BATCH_SIZE,keep_prob=config.KEEP_PROB,hidden_size=config.HIDDEN_SIZE)
+            num_steps=config.NUM_STEPS,num_layers=config.NUM_LAYERS,
+            batch_size=config.BATCH_SIZE,keep_prob=config.KEEP_PROB,
+            word_embedding_size=config.WORD_EMBEDDING_SIZE,theme_embedding_size=config.THEME_EMBEDDING_SIZE,
+            hidden_size=config.HIDDEN_SIZE)
     # Now save the dictionary, so that we can reload it.
     # we ought to save the training data too, but we don't (to save space)
     if not os.path.exists(args.log_dir):
@@ -49,7 +53,7 @@ def train_rnn(args,text_file=None,restore=False):
     # Initializer
     initializer = tf.random_uniform_initializer(-args.init_scale,args.init_scale)
     with tf.variable_scope("model", reuse = None, initializer = initializer):
-        p = model.PoetModel(args=args, is_training=True)
+        p = model.PoetModel(args=args, is_training=True, verbose=True)
     #with tf.variable_scope("model", reuse = True, initializer = initializer):
         tf.get_variable_scope().reuse_variables()
         p_sample = model.PoetModel(args=sample_args, is_training = False)

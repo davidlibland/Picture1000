@@ -9,12 +9,13 @@ from . import config
 #import numpy as np
 
 class PoetArgs(object):
-    def __init__(self,batch_size = 4, num_steps = 128, learning_rate = 0.01, max_grad_norm = 5.,
+    def __init__(self,batch_size = 4, num_steps = 128, num_layers = 2, learning_rate = 0.01, max_grad_norm = 5.,
                     init_scale = 0.05, hidden_size = 128, keep_prob = .5, word_embedding_size = 32,
                     word_vocab_size = 128, theme_embedding_size = 32, theme_vocab_size = 128,
                     log_dir=os.path.join(config.base_dir,"tmp/PoetLog"+datetime.datetime.now().isoformat())):
         self.batch_size = batch_size
         self.num_steps = num_steps
+        self.num_layers = num_layers
         self.learning_rate = learning_rate
         self.max_grad_norm = max_grad_norm
         self.init_scale = init_scale
@@ -30,7 +31,7 @@ class PoetArgs(object):
         return (str(self.__dict__))
 
 class PoetModel(object):
-    def __init__(self,args, is_training=False, verbose=True):
+    def __init__(self,args, is_training=False, verbose=False):
         # First we store the configuration object as a component.
         self._args = args
         
@@ -68,15 +69,21 @@ class PoetModel(object):
             
             # Create the GRU Cell
             size=self.args.hidden_size+self.args.theme_embedding_size
-            cell=tf.nn.rnn_cell.GRUCell(size)
+            cell=tf.nn.rnn_cell.GRUCell(size,activation=tf.nn.softsign)
             
             if is_training and self.args.keep_prob < 1:
                 cell = tf.nn.rnn_cell.DropoutWrapper(
                             cell, output_keep_prob=self.args.keep_prob)
+            # Now stack the GRU Cell on top of itself self.args.num_layers times
+            cell = tf.nn.rnn_cell.MultiRNNCell([cell] * self.args.num_layers)
+            
             
             # The initial state should be the concatination of the theme and the zero state.
             # dim 0 is batch size, so we concatinate along dim 1.
-            self._initial_state = tf.concat(1,[tf.zeros([self.args.batch_size, self.args.hidden_size], tf.float32),theme],name="initial_state") 
+            # next, we stack this initial state on top of itself self.args.num_layers times along dim 1;
+            # this way, each layer is presented with the theme.
+            self._initial_state = tf.tile(tf.concat(1,[tf.zeros([self.args.batch_size, self.args.hidden_size], tf.float32),theme]),
+                                            [1,self.args.num_layers],name="initial_state") 
 
             # Link the GRU cell sequentially to itself:
            #  outputs = []
