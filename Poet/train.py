@@ -21,6 +21,14 @@ def main():
     #raw_data_IDs, char_to_ix, ix_to_char, vocab_size  = readFile.raw_data('haiku.txt')
     prepared_poems,word_to_id,id_to_word,themes=readPoetry.read_data(os.path.join(config.base_dir,'prepared_poem_data.pkl'))
     prepared_poems=np.random.permutation(prepared_poems)[:config.NUM_POEMS]
+    # if we have a restricted sample of poems, make sure we restrict the themes appropriately:
+    if config.NUM_POEMS!= -1:
+        confined_word_set=set(sum([p[2] for p in prepared_poems],[]))
+        for thm in list(themes.keys()):
+            if word_to_id[thm] not in confined_word_set:
+                del(themes[thm])
+        if config.NUM_POEMS <=10 :
+            print('\n'.join(' '.join(id_to_word[w] for w in p[2]) for p in prepared_poems))
     vocab_size=len(id_to_word)
     theme_vocab_size=len(themes)
     print("number of training poems: %d, vocab size: %d, theme size: %d" %(len(prepared_poems),vocab_size,theme_vocab_size))

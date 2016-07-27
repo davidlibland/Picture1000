@@ -58,9 +58,11 @@ class PoetModel(object):
             with tf.name_scope('embedding'):
                 # for now, embedding needs to be placed on the cpu.
                 with tf.device("/cpu:0"):
-                    word_embedding = tf.get_variable("word_embedding", [self.args.word_vocab_size, self.args.word_embedding_size])
+                    # word_embedding = tf.get_variable("word_embedding", [self.args.word_vocab_size, self.args.word_embedding_size])
+                    word_embedding = tf.get_variable("word_embedding", [self.args.word_vocab_size, self.args.hidden_size])
                     inputs = tf.nn.embedding_lookup(word_embedding, self.input_IDs,name="word_vect")
-                    theme_embedding = tf.get_variable("theme_embedding", [self.args.theme_vocab_size, self.args.theme_embedding_size])
+                    # theme_embedding = tf.get_variable("theme_embedding", [self.args.theme_vocab_size, self.args.theme_embedding_size])
+                    theme_embedding = tf.get_variable("theme_embedding", [self.args.theme_vocab_size, self.args.hidden_size])
                     theme = tf.nn.embedding_lookup(theme_embedding, self.theme_ID,name="theme_vect")
                 if is_training and self.args.keep_prob < 1:
                     inputs = tf.nn.dropout(inputs, self.args.keep_prob)
@@ -68,7 +70,7 @@ class PoetModel(object):
             
             
             # Create the GRU Cell
-            size=self.args.hidden_size+self.args.theme_embedding_size
+            size=self.args.hidden_size #+self.args.theme_embedding_size
             cell=tf.nn.rnn_cell.GRUCell(size,activation=tf.nn.softsign)
             
             if is_training and self.args.keep_prob < 1:
@@ -82,7 +84,9 @@ class PoetModel(object):
             # dim 0 is batch size, so we concatinate along dim 1.
             # next, we stack this initial state on top of itself self.args.num_layers times along dim 1;
             # this way, each layer is presented with the theme.
-            self._initial_state = tf.tile(tf.concat(1,[tf.zeros([self.args.batch_size, self.args.hidden_size], tf.float32),theme]),
+            # self._initial_state = tf.tile(tf.concat(1,[tf.zeros([self.args.batch_size, self.args.hidden_size], tf.float32),theme]),
+            #                                [1,self.args.num_layers],name="initial_state") 
+            self._initial_state = tf.tile(tf.nn.softsign(theme),
                                             [1,self.args.num_layers],name="initial_state") 
 
             # Link the GRU cell sequentially to itself:
