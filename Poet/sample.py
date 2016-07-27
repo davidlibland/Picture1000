@@ -92,7 +92,8 @@ def sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args,samp
             if rn <= cnt:
                 sample=i
                 break
-        ix=range(args.word_vocab_size)[sample]
+        assert len(p_out_prob)==args.word_vocab_size, "There is a size mismatch between the softmax output size: %d, and the vocab size: %d" %(len(p_out_prob),args.word_vocab_size)
+        ix=sample
         txt+=id_to_word[ix]+" "
     print('----\n %s \n----' % (txt, ))
     with open(os.path.join(args.log_dir,"output.txt"),'a') as f_out:
