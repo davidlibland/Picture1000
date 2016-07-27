@@ -93,11 +93,17 @@ def train_rnn(args,text_file=None,restore=False):
                     p.writer.add_summary(summary, i)
             p.writer.flush()
             
+            # Save the model every 10 epochs:
+            if i>0  and i % 10==0:
+                # Save the model in case we want to load it later...
+                save_path = saver.save(sess, os.path.join(args.log_dir,"model.ckpt"),global_step=i)
+                print("Model saved in file: %s" % save_path)
             
             # Now print a sample:
             sample.sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args)
+        # Save the model one final time.
         # Save the model in case we want to load it later...
-        save_path = saver.save(sess, os.path.join(args.log_dir,"model.ckpt"))
+        save_path = saver.save(sess, os.path.join(args.log_dir,"model.ckpt"),global_step=i)
         print("Model saved in file: %s" % save_path)
 
 
