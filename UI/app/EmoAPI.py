@@ -30,7 +30,6 @@ def processRequest( json, data, headers, params ):
 
     """
     Helper function to process the request to Project Oxford
-
     Parameters:
     json: Used when processing images from its URL. See API Documentation
     data: Used when processing image read from disk. See API Documentation
@@ -133,4 +132,3 @@ def sentiment_analysis(image_data):
     
    
 #print (result)
-

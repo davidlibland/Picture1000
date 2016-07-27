@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+    <br>
+    <title>{{ title }}</title>
+    <h1>{{ title }}</h1>
+    
+<b> Basic idea:</b> Pic2Poem is a digital haiku writer. It uses your image and composes a haiku.
+<br>
+<br>
+<b>How does it work?</b> Pic2Poem first segments the image into words (using Convolutional Neural Networks, CNN) and then combines words into a poem (using Recursive Neural Networks (RNN) trained on a haiku database).
+<br>
+<br>
+<b> Authors: </b> Jordan Leitner, David Li-Bland, Maria Kazachenko
+
+{% endblock %}
