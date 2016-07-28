@@ -13,3 +13,15 @@
 /UI/app/hfinn.txt
 /Experimentation/tmp/HaikuTrainSum
 /Poet/tmp
+/UI/db_repository/versions/__pycache__/003_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/006_migration.cpython-35.pyc
+/Poet/__pycache__/model.cpython-35.pyc
+/Poet/__pycache__/config.cpython-35.pyc
+/Poet/__pycache__/sample.cpython-35.pyc
+/UI/app/__pycache__/__init__.cpython-35.pyc
+/UI/__pycache__/config.cpython-35.pyc
+/UI/app/__pycache__/views.cpython-35.pyc
+/UI/app/__pycache__/models.cpython-35.pyc
+/Poet/__pycache__/train.cpython-35.pyc
+/Poet/__pycache__/readPoetry.cpython-35.pyc
+/UI/app/__pycache__/classify_image.cpython-35.pyc

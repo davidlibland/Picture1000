@@ -33,7 +33,7 @@ def main():
     theme_vocab_size=len(themes)
     print("number of training poems: %d, vocab size: %d, theme size: %d" %(len(prepared_poems),vocab_size,theme_vocab_size))
     args=model.PoetArgs(word_vocab_size=vocab_size,theme_vocab_size=vocab_size,
-            learning_rate=config.LEARNING_RATE,init_scale=config.INIT_SCALE,
+            learning_rate=config.LEARNING_RATE,init_scale=1/(config.HIDDEN_SIZE+config.THEME_EMBEDDING_SIZE), # Xavier Initialization
             num_steps=config.NUM_STEPS,num_layers=config.NUM_LAYERS,
             batch_size=config.BATCH_SIZE,keep_prob=config.KEEP_PROB,
             word_embedding_size=config.WORD_EMBEDDING_SIZE,theme_embedding_size=config.THEME_EMBEDDING_SIZE,

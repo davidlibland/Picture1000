@@ -20,7 +20,6 @@
 # ==============================================================================
 
 from collections import Counter
-from random import shuffle
 import numpy as np
 import dill
     
@@ -51,7 +50,7 @@ def id_iterator(prepared_poems, batch_size, num_steps):
     # theme is associated with the poem.
         
     # Shuffle the data:
-    shuffle(prepared_poems)
+    prepared_poems=np.random.permutation(prepared_poems)
     
     #turn the poems into an array
     poem_array=np.array([p[2] for p in prepared_poems])
@@ -64,9 +63,9 @@ def id_iterator(prepared_poems, batch_size, num_steps):
 
     for j in range(batch_len):
         # Load the current batch
-        current_batch=poem_array[j:j+batch_size,:]
+        current_batch=poem_array[j*batch_size:(j+1)*batch_size,:]
         # Randomly pick the corresponding themes
-        themes=[np.random.choice(prepared_poems[i][0],p=prepared_poems[i][1]) for i in range(j,j+batch_size)]
+        themes=[np.random.choice(prepared_poems[i][0],p=prepared_poems[i][1]) for i in range(j*batch_size,(j+1)*batch_size)]
         for i in range(poem_length//num_steps):
             x=current_batch[:,i*num_steps:(i+1)*num_steps]
             y = current_batch[:, i*num_steps+1:(i+1)*num_steps+1]
