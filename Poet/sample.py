@@ -24,14 +24,12 @@ def sample(save_dir=os.path.join(config.base_dir,'Saved_Model_Dir'),sample_lengt
     print("-"*30)
     args.num_steps=1
     args.batch_size=1
+    args.log_dir=save_dir
     
     # Initializer
     initializer = tf.random_uniform_initializer(-args.init_scale,args.init_scale)
     with tf.variable_scope("model", reuse = None, initializer = initializer):
         p_sample = model.PoetModel(args=args, is_training = False)
-        
-    
-    
                                             
     with tf.Session() as sess:
         # Initialize the variables
@@ -43,13 +41,15 @@ def sample(save_dir=os.path.join(config.base_dir,'Saved_Model_Dir'),sample_lengt
         print("-"*30)
         print("loading the model")
         print("-"*30)
-        ckpt = tf.train.get_checkpoint_state(args.log_dir)
-        if ckpt and ckpt.model_checkpoint_path:
-            # Restores from checkpoint
-            saver.restore(sess, ckpt.model_checkpoint_path)
-            print("Model restored.")
-        else:
-            print("No checkpoint file found")
+        saver.restore(sess, os.path.join(save_dir,'model.ckpt-499'))
+        # ckpt = tf.train.get_checkpoint_state(args.log_dir)
+#         print(ckpt.model_checkpoint_path)
+#         if ckpt and ckpt.model_checkpoint_path:
+#             # Restores from checkpoint
+#             saver.restore(sess, tf.train.latest_checkpoint(args.log_dir)) # ckpt.model_checkpoint_path,global_step=450)
+#             print("Model restored.")
+#         else:
+#             print("No checkpoint file found")
         for i in range(num_samples):
             sample_from_active_sess(sess,p_sample,word_to_id,id_to_word,themes,args,sample_length)
         
