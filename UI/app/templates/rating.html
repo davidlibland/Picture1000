@@ -7,10 +7,10 @@
     
 {% for img_poem in img_poems %}
 
-<div><p align="left"><IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128><p class="lead">
-<b>Segments:</b> {{ img_poem.segments }}<br>
-<b>Emotions:</b> {{ img_poem.emotions }}
+<div><b>Poem:</b> {{ img_poem.poem_txt }}
 </p>
+<p align="left"><IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128><p class="lead">
+
 </div>
 <input id="input-2" name="stars{{img_poem.id}}" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" data-size="xs" data-show-caption="false" data-show-clear="false" ></input>
 {% endfor %}
