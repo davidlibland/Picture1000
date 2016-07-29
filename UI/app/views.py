@@ -7,6 +7,10 @@ from app import classify_image
 from app import EmoAPI
 from sqlalchemy import desc
 import json
+import Poet.sample as s
+import numpy as np
+
+sess,p_sample,word_to_id,id_to_word,themes,args=s.load_model()
 
 import sys
 
@@ -46,8 +50,12 @@ def process_image():
 
             print('Emotions ',(emotions),type(emotions))
             print('Segments ',(segments),type(segments))
+            
+            sample_theme=np.random.choice(list(themes.keys()))
+            sample_theme_ID=word_to_id[sample_theme]
+            txt=s.sample_from_active_sess_with_theme(sess,p_sample,word_to_id,id_to_word,sample_theme,args).replace(' <eop>','')
 
-            db_keywords=Poem(filename=filename,segments=segments,emotions=emotions,lastrating=0,meanrating=0,votes=0)
+            db_keywords=Poem(filename=filename,segments=txt,emotions=emotions,lastrating=0,meanrating=0,votes=0)
 
             #fnames = poem.query.all()  
             #for u in fnames:
