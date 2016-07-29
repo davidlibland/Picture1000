@@ -5,10 +5,12 @@
     
 {% for img_poem in img_poems %}
 
-<div><p align="left"><IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128>
+<div><p class="lead">
+<b>Poem:</b><p> {{ img_poem.poem_txt }}</p></p>
+<p align="left"><IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128>
 <input id="input-1" class="rating" data-min="0" data-max="5" data-step="1" value="{{img_poem.meanrating}}" data-disabled="true" data-size="xs" data-show-clear="false" data-show-caption="false"><b>{{img_poem.votes}} votes</b>
-<p class="lead">
-<b>Poem:</b><p> {{ img_poem.poem_txt }}</p></p></div>
+</div>
+<hr>
 
 
     {% endfor %}

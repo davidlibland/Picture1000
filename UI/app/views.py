@@ -11,9 +11,11 @@ import Poet.sample as s
 import numpy as np
 import ast
 import uuid
-#import threading
+import threading
 
 sess,p_sample,word_to_id,id_to_word,themes,args=s.load_model()
+# Run the poetry generation algorithm.
+classify_image.maybe_download_and_extract()
 
 import sys
 
@@ -41,42 +43,47 @@ def process_image():
             path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             # save the file
             file.save(path_to_image)
-            # Run the poetry generation algorithm.
-            classify_image.maybe_download_and_extract()
 
-            #image segmentation          
-            segments=classify_image.run_inference_on_image(path_to_image)
-
-            #emotion analysis
-            with open(path_to_image,'rb') as f:
-                image_data=f.read()
-            emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
-
-            #print('Emotions ',(emotions),type(emotions))
-            #print('Segments ',(segments),type(segments))
-            #if segments: 
-            #    segments=ast.literal_eval('{"'+str(segments.replace(' (score =','": ').replace(')',',"'))[0:-1]+'}')
-            if emotions:     
-                emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
-            #print('Emotions ',(emotions),type(emotions))
-            #print('Segments ',(segments),type(segments))
             
-            cur_themes,cur_weights = s.clean_themes(themes,{**segments,**emotions})
-            txt = s.multi_theme_sample(sess,p_sample,word_to_id,id_to_word,cur_themes,cur_weights,args)
-            print(dict(zip(cur_themes,cur_weights)))
-
-            db_keywords=Poem(filename=filename,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
-
-            #fnames = poem.query.all()  
-            #for u in fnames:
-            #    db.session.delete(fnames)          
+            # Create a thread to process the image and write the poem.
+            threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename)).start()
             
-            db.session.add(db_keywords)
-            db.session.commit()
             return redirect(url_for('index'))
         if allowed_file(file.filename):
             return render_template('upload.html')
     return render_template('upload.html')
+
+def Add_Poem_and_Pic_to_DB(path_to_image,filename):
+    #image segmentation          
+    segments=classify_image.run_inference_on_image(path_to_image)
+
+    #emotion analysis
+    with open(path_to_image,'rb') as f:
+        image_data=f.read()
+    emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
+
+    #print('Emotions ',(emotions),type(emotions))
+    #print('Segments ',(segments),type(segments))
+    #if segments: 
+    #    segments=ast.literal_eval('{"'+str(segments.replace(' (score =','": ').replace(')',',"'))[0:-1]+'}')
+    if emotions:     
+        emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
+    #print('Emotions ',(emotions),type(emotions))
+    #print('Segments ',(segments),type(segments))
+    
+    cur_themes,cur_weights = s.clean_themes(themes,{**segments,**emotions})
+    txt = s.multi_theme_sample(sess,p_sample,word_to_id,id_to_word,cur_themes,cur_weights,args)
+    print(dict(zip(cur_themes,cur_weights)))
+
+    db_keywords=Poem(filename=filename,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
+
+    #fnames = poem.query.all()  
+    #for u in fnames:
+    #    db.session.delete(fnames)          
+    
+    db.session.add(db_keywords)
+    db.session.commit()
+    
     
 @app.route('/')
 @app.route('/index')
