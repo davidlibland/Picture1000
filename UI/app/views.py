@@ -9,6 +9,9 @@ from sqlalchemy import desc
 import json
 import Poet.sample as s
 import numpy as np
+import ast
+import uuid
+#import threading
 
 sess,p_sample,word_to_id,id_to_word,themes,args=s.load_model()
 
@@ -33,12 +36,13 @@ def process_image():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             # Check that the file name passed is safe...
-            filename = secure_filename(file.filename)
+            # filename = secure_filename(file.filename)
+            filename=str(uuid.uuid4())
+            path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             # save the file
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            file.save(path_to_image)
             # Run the poetry generation algorithm.
             classify_image.maybe_download_and_extract()
-            path_to_image = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
             #image segmentation          
             segments=classify_image.run_inference_on_image(path_to_image)
@@ -48,14 +52,20 @@ def process_image():
                 image_data=f.read()
             emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
 
-            print('Emotions ',(emotions),type(emotions))
-            print('Segments ',(segments),type(segments))
+            #print('Emotions ',(emotions),type(emotions))
+            #print('Segments ',(segments),type(segments))
+            #if segments: 
+            #    segments=ast.literal_eval('{"'+str(segments.replace(' (score =','": ').replace(')',',"'))[0:-1]+'}')
+            if emotions:     
+                emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
+            #print('Emotions ',(emotions),type(emotions))
+            #print('Segments ',(segments),type(segments))
             
-            sample_theme=np.random.choice(list(themes.keys()))
-            sample_theme_ID=word_to_id[sample_theme]
-            txt=s.sample_from_active_sess_with_theme(sess,p_sample,word_to_id,id_to_word,sample_theme,args).replace(' <eop>','')
+            cur_themes,cur_weights = s.clean_themes(themes,{**segments,**emotions})
+            txt = s.multi_theme_sample(sess,p_sample,word_to_id,id_to_word,cur_themes,cur_weights,args)
+            print(dict(zip(cur_themes,cur_weights)))
 
-            db_keywords=Poem(filename=filename,segments=txt,emotions=emotions,lastrating=0,meanrating=0,votes=0)
+            db_keywords=Poem(filename=filename,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
 
             #fnames = poem.query.all()  
             #for u in fnames:
@@ -106,3 +116,5 @@ def rating():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+                               
+#sess.close()

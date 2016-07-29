@@ -178,11 +178,12 @@ def run_inference_on_image(image):
     node_lookup = NodeLookup()
 
     top_k = predictions.argsort()[-FLAGS.num_top_predictions:][::-1]
-    result=''
+    result={}
     for node_id in top_k:
       human_string = node_lookup.id_to_string(node_id)
       score = predictions[node_id]
-      result+='%s (score = %.5f)' % (human_string, score)
+      for word in human_string.lower().split(" "):
+        result[word]=score
     return result
 
 

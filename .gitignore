@@ -58,3 +58,4 @@
 /UI/Poet/__pycache__/model.cpython-35.pyc
 /UI/Poet/__pycache__/readFile.cpython-35.pyc
 /UI/Poet/__pycache__/sample.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/007_migration.cpython-35.pyc
