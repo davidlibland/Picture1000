@@ -25,24 +25,17 @@ import dill
     
 def read_data(data_path):
     with open(data_path,'rb') as f:
-        poems_encoded,words,word_to_id,id_to_word = dill.load(f)
-        common_words={}
-        for w in words:
-            if words[w] > 1:
-                common_words[w]=words[w]
-        weights={}
-        for w in common_words:
-            weights[word_to_id[w]]=1/words[w]
-        return poems_encoded,weights,word_to_id,id_to_word
+        data = dill.load(f)
+        return data['prepared_poems'],data['word_to_id'],data['id_to_word'],data['themes']
 
-def id_iterator(raw_data, weights, batch_size, num_steps):
+def id_iterator(prepared_poems, batch_size, num_steps):
     """Iterate on the raw data, a list of poems (with words converted to ids)
     This generates batch_size pointers into the raw text data, and allows
     minibatch iteration along these pointers.
     Args:
         raw_data: one of the raw data outputs from raw_data.
         batch_size: int, the batch size.
-        num_steps: int, the number of unrolls, should be a divisor of poem_length+1.
+        num_steps: int, the number of unrolls, should be a divisor of poem_length-1.
     Yields:
         Pairs of the batched data, each a matrix of shape [batch_size, num_steps].
         The second element of the tuple is the same data time-shifted to the
@@ -51,24 +44,29 @@ def id_iterator(raw_data, weights, batch_size, num_steps):
         ValueError: if batch_size or num_steps are too high.
     """
     
-    #shuffled_data=np.array(raw_data,dtype=np.int32)    
-    shuffled_data=np.array(np.random.permutation(raw_data),dtype=np.int32)
+    # Each Element of prepared_poems is a triple (themes,weights,poem),
+    # where themes is a list of possible themes associated to the poem
+    # weights is a list (of equal length), of how confident we are that the 
+    # theme is associated with the poem.
+        
+    # Shuffle the data:
+    prepared_poems=np.random.permutation(prepared_poems)
+    
+    #turn the poems into an array
+    poem_array=np.array([p[2] for p in prepared_poems])
+    
 
-    data_len,poem_length = shuffled_data.shape
+    data_len,poem_length = poem_array.shape
+    # num_steps: int, the number of unrolls, should be a divisor of poem_length+1.
+    assert poem_length % num_steps==1,"Poem_Length - 1,%d should be divisible by the num_steps, %d" %(poem_length-1,num_steps)
     batch_len = data_len // batch_size
 
     for j in range(batch_len):
         # Load the current batch
-        current_batch=shuffled_data[j:j+batch_size,:]
-        # Randomly pick themes from the allowed themes
-        themes=[]
-        strengths=[]
-        for i in range(batch_size):
-            themes+=[None]
-            while themes[i] not in weights:
-                themes[i]=np.random.choice(current_batch[i,:])
-            strengths.append(weights[themes[i]])
+        current_batch=poem_array[j*batch_size:(j+1)*batch_size,:]
+        # Randomly pick the corresponding themes
+        themes=[np.random.choice(prepared_poems[i][0],p=prepared_poems[i][1]) for i in range(j*batch_size,(j+1)*batch_size)]
         for i in range(poem_length//num_steps):
             x=current_batch[:,i*num_steps:(i+1)*num_steps]
             y = current_batch[:, i*num_steps+1:(i+1)*num_steps+1]
-            yield (x,y,themes,strengths,i==0)
+            yield (x,y,themes,i==0)
