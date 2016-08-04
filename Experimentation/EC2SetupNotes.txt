@@ -43,6 +43,6 @@ sudo ./install.sh
 
 10) Set up the site:
 git clone -b Star_UI https://github.com/davidlibland/Picture1000/
-https://www.dropbox.com/s/3f86m61xldbcbbg/model.ckpt-400?dl=0
+https://www.dropbox.com/s/3f86m61xldbcbbg/model.ckpt-400
 cd Picture1000/UI/
 mod_wsgi-express start-server —-reload-on-changes picture1000.wsgi
