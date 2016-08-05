@@ -25,3 +25,8 @@
 /UI/Poet/__pycache__/sample.cpython-35.pyc
 /UI/Poet/Saved_Model_Dir/model-400.ckpt
 /UI/Poet/Saved_Model_Dir/model.ckpt
+/UI/__pycache__/config.cpython-35.pyc
+/UI/app/__pycache__/__init__.cpython-35.pyc
+/UI/app/__pycache__/classify_image.cpython-35.pyc
+/UI/app/__pycache__/models.cpython-35.pyc
+/UI/app/__pycache__/views.cpython-35.pyc
