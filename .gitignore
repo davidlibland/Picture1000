@@ -12,3 +12,9 @@
 /UI/app/readFile.py
 /UI/app/hfinn.txt
 /Experimentation/tmp/HaikuTrainSum
+/UI/db_repository/versions/__pycache__/003_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/006_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/007_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/009_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/010_migration.cpython-35.pyc
+/Poet/tmp
