@@ -78,15 +78,24 @@ def choose_theme(theme_possibilities,specified_theme_dict):
     
 def clean_themes(theme_possibilities,specified_theme_dict):
     # Remove unwanted themes
+    processed_specified_theme_dict={}
     for thm in list(specified_theme_dict.keys()):
-        if thm not in theme_possibilities:
-            del(specified_theme_dict[thm])
-    rem_themes = list(specified_theme_dict.keys())
+        thm_parts=thm.lower().split(" ")
+        max_cnt = 0
+        max_part = ''
+        for thm_part in thm_parts:
+            if thm_part in theme_possibilities and theme_possibilities[thm_part] > max_cnt:
+                max_cnt=theme_possibilities[thm_part]
+                max_part=thm_part
+                #del(specified_theme_dict[thm])
+        if max_cnt > 0 :
+            processed_specified_theme_dict[max_part]=specified_theme_dict[thm]
+    rem_themes = list(processed_specified_theme_dict.keys())
     if len(rem_themes) > 0:
         # Sum up the weights and renormalize
         rel_weights = []
         for thm in rem_themes:
-            rel_weights+=[specified_theme_dict[thm]*1.]
+            rel_weights+=[processed_specified_theme_dict[thm]*1.]
         weights=np.array(rel_weights)/sum(rel_weights)
     else:
         rem_themes=['<unk>']
