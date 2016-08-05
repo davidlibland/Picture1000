@@ -40,8 +40,10 @@ def process_image():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             # Check that the file name passed is safe...
-            # filename = secure_filename(file.filename)
-            filename=str(uuid.uuid4())
+            filename = secure_filename(file.filename)
+            # get the extension
+            _,file_extension = os.path.splitext(filename)
+            filename=str(uuid.uuid4())+file_extension
             path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             # save the file
             file.save(path_to_image)
@@ -79,14 +81,16 @@ def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
 #    segments = OrderedDict(srtd_segments)
 #    segm_txt=srtd_emotions+srtd_segments#''.join('%s: %4.2f, ' % (key,val) for key, val in segm_dict.items())
 
-    segm_dict={**emotions,**segments}
-    segm_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in segm_dict.items())
+    segm_dict = {**emotions,**segments}
+    segm_list = sorted([(key,val) for key, val in segm_dict.items()],key = lambda x: -x[1])
+    segm_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in segm_list)
     
     cur_themes,cur_weights = s.clean_themes(themes,{**segments,**emotions})
     txt = s.multi_theme_sample(sess,p_sample,word_to_id,id_to_word,cur_themes,cur_weights,args)
     print('Themes ',dict(zip(cur_themes,cur_weights)))
     
-    theme_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in dict(zip(cur_themes,cur_weights)).items())
+    theme_list = sorted([(key,val) for key, val in dict(zip(cur_themes,cur_weights)).items()],key = lambda x: -x[1])
+    theme_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in theme_list)
 
     db_keywords=Poem(filename=filename,segm_txt=segm_txt,theme_txt=theme_txt,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
 

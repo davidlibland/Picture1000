@@ -176,7 +176,14 @@ def multi_theme_sample(sess,p_sample,word_to_id,id_to_word,sample_themes,sample_
     return clean_output(txt)
     
 def clean_output(txt):
-    return txt.replace(' <eop>','').replace(" \' ","\'").replace(" ,",",").replace(" .",".").replace(" ?","?").replace(" !","!").replace('\n','<br>')
+    return txt.replace(' <eop>','')\
+        .replace(' i ',' I ')\
+        .replace(" \' ","\'")\
+        .replace(" ,",",")\
+        .replace(" .",".")\
+        .replace(" ?","?")\
+        .replace(" !","!")\
+        .replace('\n','<br>')
 
 if __name__ == '__main__':
     sample()
