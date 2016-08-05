@@ -13,6 +13,8 @@ import ast
 import uuid
 import threading
 from collections import OrderedDict
+from PIL import Image
+
 
 
 sess,p_sample,word_to_id,id_to_word,themes,args=s.load_model()
@@ -43,10 +45,17 @@ def process_image():
             filename = secure_filename(file.filename)
             # get the extension
             _,file_extension = os.path.splitext(filename)
-            filename=str(uuid.uuid4())+file_extension
+            filename=str(uuid.uuid4())
             path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             # save the file
-            file.save(path_to_image)
+            #file.save(path_to_image)
+            with Image.open(file) as im:
+                bg = Image.new("RGB", im.size, (255,255,255))
+                bg.paste(im,mask=im)
+                bg.save(path_to_image + ".jpg", "JPEG")
+                size = 200, 128
+                bg.thumbnail(size, Image.ANTIALIAS)
+                bg.save(path_to_image + "_thumbnail.jpg", "JPEG")
 
             
             edit=0
@@ -57,16 +66,17 @@ def process_image():
             return redirect(url_for('index'))
         if allowed_file(file.filename):
             return render_template('upload.html')
+        else:
+            flash('Currently, we only accept jpg, png, and gif files.')
     return render_template('upload.html')
 
 def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
 
     #image segmentation          
-    segments=classify_image.run_inference_on_image(path_to_image)
-#    srtd_segments = [(k,v) for v,k in sorted([(v,k) for k,v in segments.items()],reverse=True)]
+    segments=classify_image.run_inference_on_image(path_to_image+'.jpg')
 
     #emotion analysis
-    with open(path_to_image,'rb') as f:
+    with open(path_to_image+'.jpg','rb') as f:
         image_data=f.read()
     emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
         
@@ -75,11 +85,6 @@ def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
             emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
         else:
             emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:emotions.find('face')-4]+'}')
-#        srtd_emotions = [(k,v) for v,k in sorted([(v,k) for k,v in emotions.items()],reverse=True)]
-
-#    emotions = OrderedDict(srtd_emotions)
-#    segments = OrderedDict(srtd_segments)
-#    segm_txt=srtd_emotions+srtd_segments#''.join('%s: %4.2f, ' % (key,val) for key, val in segm_dict.items())
 
     segm_dict = {**emotions,**segments}
     segm_list = sorted([(key,val) for key, val in segm_dict.items()],key = lambda x: -x[1])
@@ -93,10 +98,6 @@ def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
     theme_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in theme_list)
 
     db_keywords=Poem(filename=filename,segm_txt=segm_txt,theme_txt=theme_txt,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
-
-    #fnames = poem.query.all()  
-    #for u in fnames:
-    #    db.session.delete(fnames)          
     
     if edit==0:
         db.session.add(db_keywords)
@@ -135,11 +136,6 @@ def ingredients(id=None):
             db=Poem.query.filter_by(id=id).first()# order_by(Poem.meanrating)  
     return render_template('ingredients.html',img_poem=db)
 
-#@app.route('/recompose',methods=['POST'])
-#def recompose():
-#    threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename)).start()            
-#    return render_template('ingredients.html',img_poems=db)
-
 @app.route('/rate',methods=['POST'])
 def rate():
     img_poems=Poem.query.all()
@@ -164,8 +160,8 @@ def rating():
     return render_template('rating.html',img_poems=Poem.query.all())
 
 @app.route('/uploads/<filename>') 
-def uploaded_file(filename):
+def uploaded_thumbnail_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+                               filename+'_thumbnail.jpg')
                                
 #sess.close()

@@ -63,3 +63,4 @@
 /UI/Poet/Saved_Model_Dir/model-400.ckpt
 /UI/db_repository/versions/__pycache__/009_migration.cpython-35.pyc
 /UI/db_repository/versions/__pycache__/010_migration.cpython-35.pyc
+/UI/db_repository/versions/__pycache__/011_migration.cpython-35.pyc
