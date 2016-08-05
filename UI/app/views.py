@@ -55,7 +55,7 @@ def process_image():
                 size = 200, 128
                 im.thumbnail(size, Image.ANTIALIAS)
                 thumbnail_filename = base_filename + "_thumbnail.jpg"
-                im.save(os.path.join(app.config['UPLOAD_FOLDER'], thumbnail_filename))
+                im.save(os.path.join(app.config['UPLOAD_FOLDER'], thumbnail_filename),'JPEG',optimize=True,quality=95)
 
             
             edit=0
