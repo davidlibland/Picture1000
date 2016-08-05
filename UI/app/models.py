@@ -4,6 +4,7 @@ from app import db
 class Poem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(128), index=True, unique=True)
+    thumbnail_filename = db.Column(db.String(128), index=True, unique=True)
     segm_txt = db.Column(db.String(1000), index=True, unique=False)
     poem_txt = db.Column(db.String(400), index=True, unique=False)
     theme_txt = db.Column(db.String(400), index=True, unique=False)

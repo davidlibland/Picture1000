@@ -42,41 +42,41 @@ def process_image():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             # Check that the file name passed is safe...
-            filename = secure_filename(file.filename)
+            #filename = secure_filename(file.filename)
             # get the extension
-            _,file_extension = os.path.splitext(filename)
-            filename=str(uuid.uuid4())
+            #_,file_extension = os.path.splitext(filename)
+            base_filename=str(uuid.uuid4())
+            filename = base_filename + '.jpg'
             path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
             # save the file
-            #file.save(path_to_image)
+            file.save(path_to_image)
             with Image.open(file) as im:
-                bg = Image.new("RGB", im.size, (255,255,255))
-                bg.paste(im,mask=im)
-                bg.save(path_to_image + ".jpg", "JPEG")
+                #im.save(path_to_image,'JPEG')
                 size = 200, 128
-                bg.thumbnail(size, Image.ANTIALIAS)
-                bg.save(path_to_image + "_thumbnail.jpg", "JPEG")
+                im.thumbnail(size, Image.ANTIALIAS)
+                thumbnail_filename = base_filename + "_thumbnail.jpg"
+                im.save(os.path.join(app.config['UPLOAD_FOLDER'], thumbnail_filename))
 
             
             edit=0
             
             # Create a thread to process the image and write the poem.
-            threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,edit)).start()
+            threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,thumbnail_filename,edit)).start()
             
             return redirect(url_for('index'))
         if allowed_file(file.filename):
             return render_template('upload.html')
         else:
-            flash('Currently, we only accept jpg, png, and gif files.')
+            flash('Currently, we only accept jpeg files.')
     return render_template('upload.html')
 
-def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
+def Add_Poem_and_Pic_to_DB(path_to_image,filename,thumbnail_filename,edit):
 
     #image segmentation          
-    segments=classify_image.run_inference_on_image(path_to_image+'.jpg')
+    segments=classify_image.run_inference_on_image(path_to_image)
 
     #emotion analysis
-    with open(path_to_image+'.jpg','rb') as f:
+    with open(path_to_image,'rb') as f:
         image_data=f.read()
     emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
         
@@ -97,7 +97,8 @@ def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
     theme_list = sorted([(key,val) for key, val in dict(zip(cur_themes,cur_weights)).items()],key = lambda x: -x[1])
     theme_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in theme_list)
 
-    db_keywords=Poem(filename=filename,segm_txt=segm_txt,theme_txt=theme_txt,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
+    db_keywords=Poem(filename=filename,thumbnail_filename=thumbnail_filename,
+                segm_txt=segm_txt,theme_txt=theme_txt,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
     
     if edit==0:
         db.session.add(db_keywords)
@@ -125,10 +126,11 @@ def ingredients(id=None):
     if request.method == 'POST':
         db=Poem.query.filter_by(id=id).first()# order_by(Poem.meanrating)
         filename=db.filename
+        thumbnail_filename=db.thumbnail_filename
         path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
         # Create a thread to process the image and write the poem.
         edit=1
-        threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,edit)).start()
+        threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,thumbnail_filename,edit)).start()
     else:
         if id is None: 
             db=Poem.query.order_by(desc(Poem.meanrating)).first()# order_by(Poem.meanrating)
@@ -162,6 +164,6 @@ def rating():
 @app.route('/uploads/<filename>') 
 def uploaded_thumbnail_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename+'_thumbnail.jpg')
+                               filename)
                                
 #sess.close()
