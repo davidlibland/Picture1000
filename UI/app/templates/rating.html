@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+    <br>
+    <h1 align="left">Submit rating</h1>
+
+<form action="{{ url_for('rate') }}" method="post">
+    
+{% for img_poem in img_poems %}
+
+<div class="row">
+    <div class="col-md-4">
+        <IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128>
+
+    </div>
+        <div class="col-md-8">
+       {{ img_poem.poem_txt | safe }}
+<input id="input-2" name="stars{{img_poem.id}}" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" data-size="xs" data-show-caption="false" data-show-clear="false" ></input>
+    </div>
+</div>
+<hr>
+
+{% endfor %}
+<input type="submit" value="Submit"></input>
+</form>
+
+
+
+
+{% endblock %}

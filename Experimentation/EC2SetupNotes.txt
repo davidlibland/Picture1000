@@ -18,14 +18,31 @@ sudo -H ~/miniconda3/bin/pip3 install --upgrade tensorflow-0.9.0-cp35-cp35m-linu
 8) Install Flask
 conda install flask
 conda install sqlalchemy
+pip install sqlalchemy-migrate
 ~/miniconda3/bin/pip3 install flask-sqlalchemy
+
+9) Install opencv
+conda install -c menpo opencv3=3.1.0
+sudo apt-get install libgtk2.0-0
+conda install python-qt4
+sudo apt-get install python-qt4
+sudo apt-get install libxml2-dev libxslt1-dev python-dev
+sudo apt-get install python-lxml
+sudo apt-get install xvfb
 
 9) Set up the server:
 sudo apt-get install build-essential
 sudo -H ~/miniconda3/bin/pip3 install mod-wsgi-httpd
 sudo -H ~/miniconda3/bin/pip3 install mod-wsgi
 
+10) Install git-lfs
+wget https://github.com/github/git-lfs/releases/download/v1.3.0/git-lfs-linux-386-1.3.0.tar.gz
+tar -xzf git-lfs-linux-386-1.3.0.tar.gz
+cd git-lfs-1.3.0/
+sudo ./install.sh 
+
 10) Set up the site:
-git clone https://github.com/davidlibland/Picture1000/
+git clone -b Star_UI https://github.com/davidlibland/Picture1000/
+https://www.dropbox.com/s/3f86m61xldbcbbg/model.ckpt-400?dl=0
 cd Picture1000/UI/
 mod_wsgi-express start-server —-reload-on-changes picture1000.wsgi
