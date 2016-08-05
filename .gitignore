@@ -18,3 +18,10 @@
 /UI/db_repository/versions/__pycache__/009_migration.cpython-35.pyc
 /UI/db_repository/versions/__pycache__/010_migration.cpython-35.pyc
 /Poet/tmp
+/UI/Poet/__pycache__/__init__.cpython-35.pyc
+/UI/Poet/__pycache__/config.cpython-35.pyc
+/UI/Poet/__pycache__/model.cpython-35.pyc
+/UI/Poet/__pycache__/readFile.cpython-35.pyc
+/UI/Poet/__pycache__/sample.cpython-35.pyc
+/UI/Poet/Saved_Model_Dir/model-400.ckpt
+/UI/Poet/Saved_Model_Dir/model.ckpt
