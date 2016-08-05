@@ -12,6 +12,8 @@ import numpy as np
 import ast
 import uuid
 import threading
+from collections import OrderedDict
+
 
 sess,p_sample,word_to_id,id_to_word,themes,args=s.load_model()
 # Run the poetry generation algorithm.
@@ -45,45 +47,61 @@ def process_image():
             file.save(path_to_image)
 
             
+            edit=0
+            
             # Create a thread to process the image and write the poem.
-            threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename)).start()
+            threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,edit)).start()
             
             return redirect(url_for('index'))
         if allowed_file(file.filename):
             return render_template('upload.html')
     return render_template('upload.html')
 
-def Add_Poem_and_Pic_to_DB(path_to_image,filename):
+def Add_Poem_and_Pic_to_DB(path_to_image,filename,edit):
+
     #image segmentation          
     segments=classify_image.run_inference_on_image(path_to_image)
+#    srtd_segments = [(k,v) for v,k in sorted([(v,k) for k,v in segments.items()],reverse=True)]
 
     #emotion analysis
     with open(path_to_image,'rb') as f:
         image_data=f.read()
     emotions = json.dumps(EmoAPI.sentiment_analysis(image_data))
+        
+    if emotions:   
+        if emotions.find('face') < emotions.find('scores'):
+            emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
+        else:
+            emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:emotions.find('face')-4]+'}')
+#        srtd_emotions = [(k,v) for v,k in sorted([(v,k) for k,v in emotions.items()],reverse=True)]
 
-    #print('Emotions ',(emotions),type(emotions))
-    #print('Segments ',(segments),type(segments))
-    #if segments: 
-    #    segments=ast.literal_eval('{"'+str(segments.replace(' (score =','": ').replace(')',',"'))[0:-1]+'}')
-    if emotions:     
-        emotions=ast.literal_eval('{'+emotions[emotions.find('scores')+10:-3]+'}')
-    #print('Emotions ',(emotions),type(emotions))
-    #print('Segments ',(segments),type(segments))
+#    emotions = OrderedDict(srtd_emotions)
+#    segments = OrderedDict(srtd_segments)
+#    segm_txt=srtd_emotions+srtd_segments#''.join('%s: %4.2f, ' % (key,val) for key, val in segm_dict.items())
+
+    segm_dict={**emotions,**segments}
+    segm_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in segm_dict.items())
     
     cur_themes,cur_weights = s.clean_themes(themes,{**segments,**emotions})
     txt = s.multi_theme_sample(sess,p_sample,word_to_id,id_to_word,cur_themes,cur_weights,args)
-    print(dict(zip(cur_themes,cur_weights)))
+    print('Themes ',dict(zip(cur_themes,cur_weights)))
+    
+    theme_txt=''.join('%s: %4.2f, ' % (key,val) for key, val in dict(zip(cur_themes,cur_weights)).items())
 
-    db_keywords=Poem(filename=filename,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
+    db_keywords=Poem(filename=filename,segm_txt=segm_txt,theme_txt=theme_txt,poem_txt=txt,lastrating=0,meanrating=0,votes=0)
 
     #fnames = poem.query.all()  
     #for u in fnames:
     #    db.session.delete(fnames)          
     
-    db.session.add(db_keywords)
+    if edit==0:
+        db.session.add(db_keywords)
+    else:
+        tdb=db_keywords.query.filter_by(filename=filename).first()
+        tdb.segm_txt=segm_txt
+        tdb.theme_txt=theme_txt
+        tdb.poem_txt=txt
     db.session.commit()
-    
     
 @app.route('/')
 @app.route('/index')
@@ -95,6 +113,28 @@ def index():
 @app.route('/about')
 def about():
     return render_template('about.html',title='About')
+
+@app.route('/ingredients',methods=['POST','GET'])
+@app.route('/ingredients/<int:id>',methods=['POST','GET'])
+def ingredients(id=None):
+    if request.method == 'POST':
+        db=Poem.query.filter_by(id=id).first()# order_by(Poem.meanrating)
+        filename=db.filename
+        path_to_image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        # Create a thread to process the image and write the poem.
+        edit=1
+        threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename,edit)).start()
+    else:
+        if id is None: 
+            db=Poem.query.order_by(desc(Poem.meanrating)).first()# order_by(Poem.meanrating)
+        else: 
+            db=Poem.query.filter_by(id=id).first()# order_by(Poem.meanrating)  
+    return render_template('ingredients.html',img_poem=db)
+
+#@app.route('/recompose',methods=['POST'])
+#def recompose():
+#    threading.Thread(target=Add_Poem_and_Pic_to_DB,args=(path_to_image,filename)).start()            
+#    return render_template('ingredients.html',img_poems=db)
 
 @app.route('/rate',methods=['POST'])
 def rate():

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+    <br>
+    <h1 align="left">Ingredients</h1>
+    
+ 
+<div class="row">
+    <div class="col-md-4">
+        <IMG SRC="{{ url_for('uploaded_file',filename=img_poem.filename) }}" class="img-thumbnail" ALT="{{img_poem.filename}}" WIDTH=200 HEIGHT=128>
+
+    </div>
+        <div class="col-md-4">
+       {{ img_poem.poem_txt | safe }}
+               <input id="input-1" class="rating" data-min="0" data-max="5" data-step="1" value="{{img_poem.meanrating}}" data-disabled="true" data-size="xs" data-show-clear="false" data-show-caption="false"><b>{{img_poem.votes}} votes</b>
+               <form action="{{url_for('ingredients',id=img_poem.id)}}" method="post"><br>
+<input type="submit" value="Recompose"></input>
+</form>
+
+    </div>
+    
+    <div class="col-md-4">
+     <b>Segments: </b> {{ img_poem.segm_txt | safe }}
+     <br><b>Themes: </b> {{ img_poem.theme_txt | safe }}
+    </div>
+</div>
+
+<hr>
+
+
+
+
+
+
+
+{% endblock %}
