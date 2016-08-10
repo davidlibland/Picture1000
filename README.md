@@ -1,5 +1,6 @@
 # Pic2Poem
 This is a web app which writes poetry (Haikus) inspired by images uploaded by users.
+If you would like to run the web app, all the code is found in the UI subdirectory, along with a helpful readme file.
 
 ![Slide 1](/Slides/Pic2Poem_1.png)
 ![Slide 2](/Slides/Pic2Poem_2.png)
